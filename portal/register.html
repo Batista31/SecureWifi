@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - WiFi Access Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+</head>
+<body>
+  <div class="portal-container">
+    <!-- Header -->
+    <header class="portal-header compact">
+      <a href="index.html" class="back-link">← Back</a>
+      <div class="logo">
+        <svg class="wifi-icon small" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 18c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-4.9-2.3l1.4 1.4C9.4 16.4 10.6 16 12 16s2.6.4 3.5 1.1l1.4-1.4C15.6 14.6 13.9 14 12 14s-3.6.6-4.9 1.7z"/>
+        </svg>
+        <h1>Create Account</h1>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="portal-main">
+      <!-- Error/Success Messages -->
+      <div id="message-box" class="message-box hidden"></div>
+
+      <!-- Registration Form -->
+      <form id="register-form" class="auth-form active">
+        <h2>Register New Account</h2>
+        <p class="form-description">Create an account to access the network</p>
+        
+        <div class="form-group">
+          <label for="reg-username">Username *</label>
+          <input 
+            type="text" 
+            id="reg-username" 
+            name="username" 
+            placeholder="Choose a username"
+            autocomplete="username"
+            minlength="3"
+            maxlength="50"
+            pattern="[a-zA-Z0-9_]+"
+            required
+          >
+          <small class="input-hint">Letters, numbers, and underscores only</small>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Password *</label>
+          <input 
+            type="password" 
+            id="reg-password" 
+            name="password" 
+            placeholder="Create a password"
+            autocomplete="new-password"
+            minlength="6"
+            required
+          >
+          <small class="input-hint">At least 6 characters</small>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password-confirm">Confirm Password *</label>
+          <input 
+            type="password" 
+            id="reg-password-confirm" 
+            name="passwordConfirm" 
+            placeholder="Confirm your password"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email (optional)</label>
+          <input 
+            type="email" 
+            id="reg-email" 
+            name="email" 
+            placeholder="your@email.com"
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="reg-phone">Phone (optional)</label>
+          <input 
+            type="tel" 
+            id="reg-phone" 
+            name="phone" 
+            placeholder="+1234567890"
+            autocomplete="tel"
+          >
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="agree-terms" required>
+            <span>I agree to the <a href="terms.html" target="_blank">Terms of Service</a></span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+
+        <p class="form-footer">
+          Already have an account? <a href="login.html?method=login">Sign in here</a>
+        </p>
+      </form>
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer">
+      <p class="copyright">&copy; 2024 Secure WiFi Project</p>
+    </footer>
+  </div>
+
+  <script src="js/portal.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+[Unit]
+Description=Captive Portal Firewall Rules
+Documentation=https://github.com/captive-portal
+After=network.target captive-portal-network.service
+Before=captive-portal.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Environment configuration
+Environment=CAPTIVE_WLAN_INTERFACE=wlan0
+Environment=CAPTIVE_WAN_INTERFACE=eth0
+Environment=CAPTIVE_PORTAL_IP=192.168.4.1
+Environment=CAPTIVE_PORTAL_NETWORK=192.168.4.0/24
+
+# Initialize firewall rules
+ExecStart=/opt/captive-portal/network/scripts/firewall.sh init
+
+# Cleanup on stop
+ExecStop=/opt/captive-portal/network/scripts/firewall.sh flush
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=captive-portal-firewall
+
+[Install]
+WantedBy=multi-user.target

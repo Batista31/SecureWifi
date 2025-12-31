@@ -1,0 +1,27 @@
+[Unit]
+Description=Captive Portal Client Isolation
+Documentation=https://github.com/captive-portal
+After=hostapd.service captive-portal-network.service
+Wants=hostapd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Environment configuration
+Environment=CAPTIVE_WLAN_INTERFACE=wlan0
+Environment=CAPTIVE_PORTAL_IP=192.168.4.1
+
+# Enable Layer-2 isolation
+ExecStart=/opt/captive-portal/network/scripts/client-isolation.sh enable
+
+# Disable on stop
+ExecStop=/opt/captive-portal/network/scripts/client-isolation.sh disable
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=captive-portal-isolation
+
+[Install]
+WantedBy=multi-user.target

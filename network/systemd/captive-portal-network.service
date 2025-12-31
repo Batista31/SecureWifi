@@ -1,0 +1,29 @@
+[Unit]
+Description=Captive Portal Network Setup
+Documentation=https://github.com/captive-portal
+After=network-online.target hostapd.service
+Wants=network-online.target
+Before=captive-portal.service dnsmasq.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Environment configuration
+Environment=CAPTIVE_WLAN_INTERFACE=wlan0
+Environment=CAPTIVE_WAN_INTERFACE=eth0
+Environment=CAPTIVE_PORTAL_IP=192.168.4.1
+
+# Run network setup script
+ExecStart=/opt/captive-portal/network/scripts/setup-network.sh wlan0 setup
+
+# Cleanup on stop
+ExecStop=/opt/captive-portal/network/scripts/setup-network.sh wlan0 cleanup
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=captive-portal-network
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+# ==============================================================================
+# dnsmasq Hosts File - Local DNS Entries
+# ==============================================================================
+# Location: /etc/dnsmasq.hosts
+# ==============================================================================
+
+# Captive Portal Server
+192.168.4.1     portal.captive.local
+192.168.4.1     captive.local
+192.168.4.1     login.captive.local
+192.168.4.1     auth.captive.local
+
+# Gateway
+192.168.4.1     gateway.captive.local
+192.168.4.1     router.captive.local
+
+# Admin Dashboard
+192.168.4.1     admin.captive.local
+192.168.4.1     dashboard.captive.local

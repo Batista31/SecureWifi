@@ -1,0 +1,49 @@
+[Unit]
+Description=Captive Portal Backend Service
+Documentation=https://github.com/captive-portal
+After=network.target dnsmasq.service hostapd.service
+Wants=dnsmasq.service hostapd.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+# Working directory
+WorkingDirectory=/opt/captive-portal/backend
+
+# Environment
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=0.0.0.0
+Environment=JWT_SECRET=your-super-secret-jwt-key-change-in-production
+Environment=SIMULATION_MODE=false
+
+# Node.js executable path (update if different on your system)
+ExecStart=/usr/bin/node src/index.js
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=captive-portal
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/captive-portal/backend/database
+ReadWritePaths=/var/log/captive-portal
+ReadWritePaths=/var/run/captive-portal
+
+# Resource limits
+LimitNOFILE=65535
+MemoryMax=512M
+CPUQuota=80%
+
+[Install]
+WantedBy=multi-user.target

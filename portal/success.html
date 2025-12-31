@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connected - WiFi Access Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+</head>
+<body>
+  <div class="portal-container">
+    <!-- Header -->
+    <header class="portal-header">
+      <div class="logo">
+        <svg class="wifi-icon connected" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 18c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-4.9-2.3l1.4 1.4C9.4 16.4 10.6 16 12 16s2.6.4 3.5 1.1l1.4-1.4C15.6 14.6 13.9 14 12 14s-3.6.6-4.9 1.7zM4.6 13.2l1.4 1.4C7.3 13.6 9.5 13 12 13s4.7.6 6 1.6l1.4-1.4C17.7 11.8 15 11 12 11s-5.7.8-7.4 2.2zM2 10.7l1.4 1.4C5.1 10.7 8.3 10 12 10s6.9.7 8.6 2.1L22 10.7C19.8 9.1 16.1 8 12 8s-7.8 1.1-10 2.7z"/>
+        </svg>
+        <h1>Connected!</h1>
+      </div>
+    </header>
+
+    <!-- Success Animation -->
+    <div class="success-animation">
+      <div class="checkmark-circle">
+        <svg class="checkmark" viewBox="0 0 52 52">
+          <circle class="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="portal-main">
+      <div class="success-message">
+        <h2>You're now connected to the network!</h2>
+        <p>Enjoy your secure internet access.</p>
+      </div>
+
+      <!-- Session Info -->
+      <div class="session-info">
+        <h3>Session Details</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value status-active" id="session-status">Active</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Time Remaining</span>
+            <span class="info-value" id="time-remaining">--:--:--</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Connected Since</span>
+            <span class="info-value" id="connected-since">--</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Auth Method</span>
+            <span class="info-value" id="auth-method">--</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">MAC Address</span>
+            <span class="info-value" id="mac-address">--</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">IP Address</span>
+            <span class="info-value" id="ip-address">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="session-actions">
+        <button id="test-connection" class="btn btn-outline">
+          Test Connection
+        </button>
+        <button id="logout-btn" class="btn btn-danger">
+          Disconnect
+        </button>
+      </div>
+
+      <!-- Connection Test Result -->
+      <div id="test-result" class="test-result hidden">
+        <div class="test-icon">✓</div>
+        <span class="test-text">Internet connection is working!</span>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer">
+      <p class="security-notice">
+        🔒 Your connection is protected with client isolation and MAC/IP binding.
+      </p>
+      <p class="copyright">&copy; 2024 Secure WiFi Project</p>
+    </footer>
+  </div>
+
+  <script src="js/portal.js"></script>
+  <script src="js/success.js"></script>
+</body>
+</html>

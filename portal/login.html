@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - WiFi Access Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+</head>
+<body>
+  <div class="portal-container">
+    <!-- Header -->
+    <header class="portal-header compact">
+      <a href="index.html" class="back-link">← Back</a>
+      <div class="logo">
+        <svg class="wifi-icon small" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 18c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-4.9-2.3l1.4 1.4C9.4 16.4 10.6 16 12 16s2.6.4 3.5 1.1l1.4-1.4C15.6 14.6 13.9 14 12 14s-3.6.6-4.9 1.7z"/>
+        </svg>
+        <h1>WiFi Access Portal</h1>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="portal-main">
+      <!-- Tab Navigation -->
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="voucher">Voucher Code</button>
+        <button class="tab-btn" data-tab="login">Sign In</button>
+      </div>
+
+      <!-- Error/Success Messages -->
+      <div id="message-box" class="message-box hidden"></div>
+
+      <!-- Voucher Form -->
+      <form id="voucher-form" class="auth-form active">
+        <h2>Enter Voucher Code</h2>
+        <p class="form-description">Enter the access code you received</p>
+        
+        <div class="form-group">
+          <label for="voucher-code">Voucher Code</label>
+          <input 
+            type="text" 
+            id="voucher-code" 
+            name="code" 
+            placeholder="e.g., TEST1234"
+            autocomplete="off"
+            autocapitalize="characters"
+            maxlength="20"
+            required
+          >
+          <small class="input-hint">Code is case-insensitive</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <span class="btn-text">Connect</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+      </form>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form hidden">
+        <h2>Sign In</h2>
+        <p class="form-description">Use your registered account</p>
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Enter username"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Enter password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loader hidden"></span>
+        </button>
+
+        <p class="form-footer">
+          Don't have an account? <a href="register.html">Register here</a>
+        </p>
+      </form>
+
+      <!-- Sample Vouchers (for demo - remove in production) -->
+      <div class="demo-info">
+        <h4>Demo Voucher Codes</h4>
+        <p>Try these test codes:</p>
+        <ul>
+          <li><code>TEST1234</code> - 4 hours, 2 devices</li>
+          <li><code>DEMO5678</code> - 8 hours, 1 device</li>
+          <li><code>WIFI2024</code> - 24 hours, 3 devices</li>
+        </ul>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer">
+      <p class="copyright">&copy; 2024 Secure WiFi Project</p>
+    </footer>
+  </div>
+
+  <script src="js/portal.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
