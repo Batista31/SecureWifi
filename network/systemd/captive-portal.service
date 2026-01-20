@@ -17,10 +17,10 @@ Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=HOST=0.0.0.0
 Environment=JWT_SECRET=your-super-secret-jwt-key-change-in-production
-Environment=SIMULATION_MODE=false
+Environment=SECURITY_MODE=production
 
-# Node.js executable path (update if different on your system)
-ExecStart=/usr/bin/node src/index.js
+# Node.js executable path (auto-detect WAN interface)
+ExecStart=/bin/bash -c "export LAN_INTERFACE=$(ip -o -4 route show to default | awk '{print $5}' | head -n1 || echo eth0); /usr/bin/node src/app.js"
 
 # Restart policy
 Restart=always

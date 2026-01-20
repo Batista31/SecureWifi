@@ -157,7 +157,7 @@ app.get('/success', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
-    mode: process.env.SECURITY_MODE || 'simulation',
+    mode: process.env.SECURITY_MODE || 'production',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
@@ -172,7 +172,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Endpoint not found' });
   }
-  
+
   // For all other routes, redirect to portal (captive portal behavior)
   res.redirect('/portal/index.html');
 });
@@ -192,29 +192,29 @@ async function startServer() {
     // Initialize database
     await initializeDatabase();
     console.log('✓ Database initialized');
-    
+
     // Initialize rule engine (firewall)
     await ruleEngine.initialize();
     console.log('✓ Rule engine initialized');
-    
+
     // Log startup
     await logEvent('SYSTEM', 'SERVER_START', {
-      mode: process.env.SECURITY_MODE || 'simulation',
+      mode: process.env.SECURITY_MODE || 'production',
       port: PORT,
     });
-    
+
     // Start server
     const server = app.listen(PORT, HOST, () => {
       console.log('\n========================================');
       console.log('  WiFi Captive Portal Server Started');
       console.log('========================================');
-      console.log(`  Mode:     ${process.env.SECURITY_MODE || 'simulation'}`);
+      console.log(`  Mode:     ${process.env.SECURITY_MODE || 'production'}`);
       console.log(`  URL:      http://localhost:${PORT}`);
       console.log(`  Portal:   http://localhost:${PORT}/portal`);
       console.log(`  API:      http://localhost:${PORT}/api`);
       console.log('========================================\n');
     });
-    
+
     server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
         console.error(`Port ${PORT} is already in use. Please stop the other process or use a different port.`);
@@ -223,7 +223,7 @@ async function startServer() {
       }
       process.exit(1);
     });
-    
+
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

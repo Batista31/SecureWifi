@@ -1,9 +1,9 @@
 [Unit]
 Description=Captive Portal Network Setup
 Documentation=https://github.com/captive-portal
-After=network-online.target hostapd.service
+After=network-online.target
 Wants=network-online.target
-Before=captive-portal.service dnsmasq.service
+Before=hostapd.service captive-portal.service dnsmasq.service
 
 [Service]
 Type=oneshot

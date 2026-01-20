@@ -108,7 +108,10 @@ install_packages() {
         git \
         curl \
         wireless-tools \
-        iw
+        iw \
+        usbmuxd \
+        ipheth-utils \
+        libimobiledevice-utils
     
     # Check Node.js version
     NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
@@ -140,6 +143,10 @@ copy_project_files() {
     
     if [[ -d "$PROJECT_DIR/backend" ]]; then
         cp -r "$PROJECT_DIR/backend" "$INSTALL_DIR/"
+        # Copy and patch package.json for the backend service
+        cp "$PROJECT_DIR/package.json" "$INSTALL_DIR/backend/"
+        sed -i 's|backend/src/|src/|g' "$INSTALL_DIR/backend/package.json"
+
         cp -r "$PROJECT_DIR/dashboard" "$INSTALL_DIR/"
         cp -r "$PROJECT_DIR/network" "$INSTALL_DIR/"
         print_success "Project files copied to $INSTALL_DIR"

@@ -27,8 +27,17 @@ PORTAL_NETMASK="255.255.255.0"
 PORTAL_NETWORK="192.168.4.0/24"
 PORTAL_PORT="3000"
 
-# Upstream interface (usually eth0 for wired or wlan1 for another WiFi)
+# Upstream interface (Auto-detected)
 WAN_INTERFACE="eth0"
+if ip link show usb0 &>/dev/null; then
+    WAN_INTERFACE="usb0"
+elif ip link show eth1 &>/dev/null; then
+    WAN_INTERFACE="eth1"
+fi
+# Allow override via environment variable
+if [[ -n "$CAPTIVE_WAN_INTERFACE" ]]; then
+    WAN_INTERFACE="$CAPTIVE_WAN_INTERFACE"
+fi
 
 # Log file
 LOG_FILE="/var/log/captive-portal/setup.log"

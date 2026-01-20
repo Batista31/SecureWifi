@@ -41,6 +41,8 @@ wifi-captive-portal/
 
 ## 🚀 Quick Start
 
+> **🍓 Raspberry Pi Users:** Check out [DEPLOY_ON_PI.md](./DEPLOY_ON_PI.md) for full hardware deployment instructions.
+
 ### Prerequisites
 
 - Node.js 18+ (LTS recommended)

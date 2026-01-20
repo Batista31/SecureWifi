@@ -8,11 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initVoucherForm();
   initLoginForm();
-  
+
   // Check URL params for default tab
   const urlParams = new URLSearchParams(window.location.search);
   const method = urlParams.get('method');
-  
+
   if (method === 'login') {
     switchTab('login');
   }
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function initTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
-  
+
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const tabName = btn.dataset.tab;
@@ -40,11 +40,11 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
-  
+
   // Update forms
   const voucherForm = document.getElementById('voucher-form');
   const loginForm = document.getElementById('login-form');
-  
+
   if (tabName === 'voucher') {
     voucherForm.classList.remove('hidden');
     voucherForm.classList.add('active');
@@ -56,7 +56,7 @@ function switchTab(tabName) {
     voucherForm.classList.add('hidden');
     voucherForm.classList.remove('active');
   }
-  
+
   // Clear messages
   ui.hideMessage();
 }
@@ -67,39 +67,42 @@ function switchTab(tabName) {
 function initVoucherForm() {
   const form = document.getElementById('voucher-form');
   const codeInput = document.getElementById('voucher-code');
-  
+
   // Auto-uppercase input
   codeInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.toUpperCase();
   });
-  
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const code = codeInput.value.trim();
-    
+
     if (!code) {
       ui.showMessage('error', 'Please enter a voucher code');
       return;
     }
-    
+
     const submitBtn = form.querySelector('button[type="submit"]');
     ui.setButtonLoading(submitBtn, true);
     ui.hideMessage();
-    
+
     try {
       const result = await api.authVoucher(code);
-      
+
       if (result.success) {
+        // Calculate expiresAt if not provided (fallback for Mock DB)
+        const expiresAt = result.expiresAt || new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString();
+
         // Save session
         session.save(result.token, {
-          sessionId: result.sessionId,
-          expiresAt: result.expiresAt,
+          sessionId: result.sessionId || 'demo-session',
+          expiresAt: expiresAt,
           authMethod: 'voucher',
         });
-        
+
         ui.showMessage('success', 'Authentication successful! Redirecting...');
-        
+
         // Redirect to success page
         setTimeout(() => {
           window.location.href = 'success.html';
@@ -120,25 +123,25 @@ function initVoucherForm() {
  */
 function initLoginForm() {
   const form = document.getElementById('login-form');
-  
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-    
+
     if (!username || !password) {
       ui.showMessage('error', 'Please enter username and password');
       return;
     }
-    
+
     const submitBtn = form.querySelector('button[type="submit"]');
     ui.setButtonLoading(submitBtn, true);
     ui.hideMessage();
-    
+
     try {
       const result = await api.authLogin(username, password);
-      
+
       if (result.success) {
         // Save session
         session.save(result.token, {
@@ -147,9 +150,9 @@ function initLoginForm() {
           authMethod: 'user',
           username: username,
         });
-        
+
         ui.showMessage('success', 'Login successful! Redirecting...');
-        
+
         // Redirect to success page
         setTimeout(() => {
           window.location.href = 'success.html';
