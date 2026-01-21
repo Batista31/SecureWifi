@@ -94,8 +94,17 @@ const dbWrapper = {
         if (!db) throw new Error('Database not initialized');
         try {
           db.run(sql, params);
+          const changes = db.getRowsModified();
+          // Get last insert rowid for INSERT statements
+          let lastInsertRowid = 0;
+          if (sql.trim().toUpperCase().startsWith('INSERT')) {
+            const result = db.exec('SELECT last_insert_rowid()');
+            if (result.length > 0 && result[0].values.length > 0) {
+              lastInsertRowid = result[0].values[0][0];
+            }
+          }
           saveDatabase(); // Save after write operations
-          return { changes: db.getRowsModified(), lastInsertRowid: 0 };
+          return { changes, lastInsertRowid };
         } catch (error) {
           console.error('SQL run error:', error.message, 'SQL:', sql);
           return { changes: 0, lastInsertRowid: 0 };
