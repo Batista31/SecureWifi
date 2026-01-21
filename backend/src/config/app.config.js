@@ -14,27 +14,27 @@ const config = {
     port: parseInt(process.env.PORT, 10) || 3000,
     host: process.env.HOST || 'localhost',
   },
-  
+
   // Security
   security: {
-    mode: process.env.SECURITY_MODE || 'simulation', // 'simulation' | 'production'
+    mode: process.env.SECURITY_MODE || 'production', // 'simulation' | 'production'
     jwtSecret: process.env.JWT_SECRET || 'default-secret-change-me',
     jwtExpiry: parseInt(process.env.JWT_EXPIRY, 10) || 14400, // 4 hours in seconds
     bcryptRounds: 10,
   },
-  
+
   // Session
   session: {
     durationHours: parseInt(process.env.SESSION_DURATION_HOURS, 10) || 4,
     maxDevicesPerUser: parseInt(process.env.MAX_DEVICES_PER_USER, 10) || 2,
   },
-  
+
   // Admin
   admin: {
     username: process.env.ADMIN_USERNAME || 'admin',
     password: process.env.ADMIN_PASSWORD || 'admin123',
   },
-  
+
   // Network (for production/hardware mode)
   network: {
     wifiInterface: process.env.WIFI_INTERFACE || 'wlan0',
@@ -47,12 +47,12 @@ const config = {
       leaseTime: process.env.DHCP_LEASE_TIME || '12h',
     },
   },
-  
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || 'standard', // 'minimal' | 'standard' | 'verbose'
   },
-  
+
   // Voucher settings
   voucher: {
     codeLength: 8,
