@@ -23,13 +23,13 @@ router.post('/voucher',
     const { code } = req.body;
     const macAddress = req.headers['x-client-mac'] || req.clientMac;
     const ipAddress = req.clientIp;
-    
+
     const result = await authService.authenticateWithVoucher(code, macAddress, ipAddress);
-    
+
     if (!result.success) {
       return res.status(401).json({ error: result.message });
     }
-    
+
     res.json({
       success: true,
       token: result.token,
@@ -52,15 +52,15 @@ router.post('/login',
     const { username, password } = req.body;
     const macAddress = req.headers['x-client-mac'] || req.clientMac;
     const ipAddress = req.clientIp;
-    
+
     const result = await authService.authenticateWithCredentials(
       username, password, macAddress, ipAddress
     );
-    
+
     if (!result.success) {
       return res.status(401).json({ error: result.message });
     }
-    
+
     res.json({
       success: true,
       token: result.token,
@@ -80,13 +80,13 @@ router.post('/register',
   handleValidation,
   asyncHandler(async (req, res) => {
     const { username, password, email, phone } = req.body;
-    
+
     const result = await authService.registerUser({ username, password, email, phone });
-    
+
     if (!result.success) {
       return res.status(400).json({ error: result.message });
     }
-    
+
     res.status(201).json({
       success: true,
       userId: result.userId,
@@ -102,13 +102,13 @@ router.post('/register',
 router.post('/validate',
   asyncHandler(async (req, res) => {
     const token = req.headers['authorization']?.split(' ')[1] || req.body.token;
-    
+
     if (!token) {
       return res.status(400).json({ error: 'Token required' });
     }
-    
+
     const result = authService.validateSession(token);
-    
+
     res.json({
       valid: result.valid,
       session: result.valid ? {
@@ -129,17 +129,17 @@ router.post('/validate',
 router.post('/logout',
   asyncHandler(async (req, res) => {
     const token = req.headers['authorization']?.split(' ')[1];
-    
+
     if (!token) {
       return res.status(400).json({ error: 'Token required' });
     }
-    
+
     const result = authService.validateSession(token);
-    
+
     if (result.valid) {
-      authService.endSession(result.session.id);
+      await authService.endSession(result.session.id);
     }
-    
+
     res.json({ success: true, message: 'Logged out successfully' });
   })
 );

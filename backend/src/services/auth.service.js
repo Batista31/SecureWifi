@@ -31,53 +31,53 @@ function getSessionFirewallService() {
  */
 async function authenticateWithVoucher(code, macAddress, ipAddress) {
   const normalizedMac = normalizeMacAddress(macAddress);
-  
+
   // Find voucher
   const voucher = db.prepare(`
     SELECT * FROM vouchers 
     WHERE code = ? AND is_active = 1
   `).get(code.toUpperCase());
-  
+
   if (!voucher) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Invalid voucher code');
     return { success: false, message: 'Invalid voucher code' };
   }
-  
+
   // Check if voucher is expired
   if (voucher.expires_at && new Date(voucher.expires_at) < new Date()) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Voucher expired');
     return { success: false, message: 'Voucher has expired' };
   }
-  
+
   // Check device count for this voucher
   const deviceCount = db.prepare(`
     SELECT COUNT(DISTINCT mac_address) as count 
     FROM sessions 
     WHERE voucher_id = ? AND is_active = 1
   `).get(voucher.id);
-  
+
   // Check if this MAC is already using this voucher
   const existingSession = db.prepare(`
     SELECT * FROM sessions 
     WHERE voucher_id = ? AND mac_address = ? AND is_active = 1
   `).get(voucher.id, normalizedMac);
-  
+
   if (!existingSession && deviceCount.count >= voucher.max_devices) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Voucher device limit reached');
-    return { 
-      success: false, 
-      message: `Maximum devices (${voucher.max_devices}) reached for this voucher` 
+    return {
+      success: false,
+      message: `Maximum devices (${voucher.max_devices}) reached for this voucher`
     };
   }
-  
+
   // Create or update device record
   const device = await getOrCreateDevice(normalizedMac);
-  
+
   if (device.is_blocked) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Device is blocked');
     return { success: false, message: 'This device has been blocked' };
   }
-  
+
   // If existing active session, return that token
   if (existingSession) {
     const token = generateToken(existingSession);
@@ -89,7 +89,7 @@ async function authenticateWithVoucher(code, macAddress, ipAddress) {
       message: 'Session resumed',
     };
   }
-  
+
   // Create new session
   const session = await createSession({
     voucherId: voucher.id,
@@ -99,7 +99,7 @@ async function authenticateWithVoucher(code, macAddress, ipAddress) {
     authMethod: 'voucher',
     durationHours: voucher.duration_hours,
   });
-  
+
   // Mark voucher as used (first use)
   if (!voucher.used_at) {
     db.prepare(`
@@ -107,9 +107,9 @@ async function authenticateWithVoucher(code, macAddress, ipAddress) {
       WHERE id = ?
     `).run(normalizedMac, voucher.id);
   }
-  
+
   securityLog.authSuccess(normalizedMac, ipAddress, 'voucher');
-  
+
   return {
     success: true,
     token: session.token,
@@ -124,53 +124,53 @@ async function authenticateWithVoucher(code, macAddress, ipAddress) {
  */
 async function authenticateWithCredentials(username, password, macAddress, ipAddress) {
   const normalizedMac = normalizeMacAddress(macAddress);
-  
+
   // Find user
   const user = db.prepare(`
     SELECT * FROM users WHERE username = ? AND is_active = 1
   `).get(username);
-  
+
   if (!user) {
     securityLog.authFailure(normalizedMac, ipAddress, 'User not found');
     return { success: false, message: 'Invalid username or password' };
   }
-  
+
   // Verify password
   const validPassword = await bcrypt.compare(password, user.password_hash);
-  
+
   if (!validPassword) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Invalid password');
     return { success: false, message: 'Invalid username or password' };
   }
-  
+
   // Check device
   const device = await getOrCreateDevice(normalizedMac);
-  
+
   if (device.is_blocked) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Device is blocked');
     return { success: false, message: 'This device has been blocked' };
   }
-  
+
   // Check max devices for this user
   const activeDevices = db.prepare(`
     SELECT COUNT(DISTINCT mac_address) as count 
     FROM sessions 
     WHERE user_id = ? AND is_active = 1
   `).get(user.id);
-  
+
   const existingSession = db.prepare(`
     SELECT * FROM sessions 
     WHERE user_id = ? AND mac_address = ? AND is_active = 1
   `).get(user.id, normalizedMac);
-  
+
   if (!existingSession && activeDevices.count >= config.session.maxDevicesPerUser) {
     securityLog.authFailure(normalizedMac, ipAddress, 'Device limit reached');
-    return { 
-      success: false, 
-      message: `Maximum devices (${config.session.maxDevicesPerUser}) reached` 
+    return {
+      success: false,
+      message: `Maximum devices (${config.session.maxDevicesPerUser}) reached`
     };
   }
-  
+
   // Return existing session or create new
   if (existingSession) {
     const token = generateToken(existingSession);
@@ -182,7 +182,7 @@ async function authenticateWithCredentials(username, password, macAddress, ipAdd
       message: 'Session resumed',
     };
   }
-  
+
   // Create session
   const session = await createSession({
     userId: user.id,
@@ -192,12 +192,12 @@ async function authenticateWithCredentials(username, password, macAddress, ipAdd
     authMethod: 'user',
     durationHours: config.session.durationHours,
   });
-  
+
   // Update user last login
   db.prepare('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
-  
+
   securityLog.authSuccess(normalizedMac, ipAddress, 'user', user.id);
-  
+
   return {
     success: true,
     token: session.token,
@@ -212,23 +212,23 @@ async function authenticateWithCredentials(username, password, macAddress, ipAdd
  */
 async function registerUser(userData) {
   const { username, password, email, phone } = userData;
-  
+
   // Check if username exists
   const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
-  
+
   if (existing) {
     return { success: false, message: 'Username already exists' };
   }
-  
+
   // Hash password
   const passwordHash = await bcrypt.hash(password, config.security.bcryptRounds);
-  
+
   // Insert user
   const result = db.prepare(`
     INSERT INTO users (username, password_hash, email, phone)
     VALUES (?, ?, ?, ?)
   `).run(username, passwordHash, email || null, phone || null);
-  
+
   return {
     success: true,
     userId: result.lastInsertRowid,
@@ -242,7 +242,7 @@ async function registerUser(userData) {
 async function createSession({ userId, voucherId, deviceId, macAddress, ipAddress, authMethod, durationHours }) {
   const sessionToken = uuidv4();
   const expiresAt = new Date(Date.now() + durationHours * 60 * 60 * 1000).toISOString();
-  
+
   const result = db.prepare(`
     INSERT INTO sessions (
       session_token, user_id, voucher_id, device_id,
@@ -258,27 +258,27 @@ async function createSession({ userId, voucherId, deviceId, macAddress, ipAddres
     authMethod,
     expiresAt
   );
-  
+
   const sessionId = result.lastInsertRowid;
-  
+
   // Create MAC-IP binding
   db.prepare(`
     INSERT OR REPLACE INTO mac_ip_bindings (mac_address, ip_address, session_id, expires_at)
     VALUES (?, ?, ?, ?)
   `).run(macAddress, ipAddress, sessionId, expiresAt);
-  
+
   // Update device stats
   db.prepare(`
     UPDATE devices 
     SET last_seen = CURRENT_TIMESTAMP, total_sessions = total_sessions + 1
     WHERE id = ?
   `).run(deviceId);
-  
+
   // Log session creation
   securityLog.sessionCreated(sessionId, macAddress, ipAddress);
-  
+
   const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(sessionId);
-  
+
   // Apply firewall rules for this session (async, don't block auth)
   try {
     const firewallService = getSessionFirewallService();
@@ -288,7 +288,7 @@ async function createSession({ userId, voucherId, deviceId, macAddress, ipAddres
   } catch (err) {
     console.error('[AUTH] Failed to trigger firewall rules:', err);
   }
-  
+
   return {
     id: sessionId,
     token: generateToken(session),
@@ -327,18 +327,18 @@ function verifyToken(token) {
  */
 async function getOrCreateDevice(macAddress) {
   let device = db.prepare('SELECT * FROM devices WHERE mac_address = ?').get(macAddress);
-  
+
   if (!device) {
     const result = db.prepare(`
       INSERT INTO devices (mac_address) VALUES (?)
     `).run(macAddress);
-    
+
     device = db.prepare('SELECT * FROM devices WHERE id = ?').get(result.lastInsertRowid);
   } else {
     // Update last seen
     db.prepare('UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE id = ?').run(device.id);
   }
-  
+
   return device;
 }
 
@@ -347,10 +347,10 @@ async function getOrCreateDevice(macAddress) {
  */
 function normalizeMacAddress(mac) {
   if (!mac) return '00:00:00:00:00:00';
-  
+
   // Remove all separators and convert to lowercase
   const clean = mac.replace(/[:-]/g, '').toLowerCase();
-  
+
   // Format as xx:xx:xx:xx:xx:xx
   return clean.match(/.{2}/g)?.join(':') || '00:00:00:00:00:00';
 }
@@ -360,46 +360,51 @@ function normalizeMacAddress(mac) {
  */
 function validateSession(token) {
   const decoded = verifyToken(token);
-  
+
   if (!decoded) {
     return { valid: false, message: 'Invalid token' };
   }
-  
+
   const session = db.prepare(`
     SELECT * FROM sessions 
     WHERE id = ? AND is_active = 1
   `).get(decoded.sessionId);
-  
+
   if (!session) {
     return { valid: false, message: 'Session not found or expired' };
   }
-  
+
   if (new Date(session.expires_at) < new Date()) {
     // Deactivate expired session
     db.prepare('UPDATE sessions SET is_active = 0 WHERE id = ?').run(session.id);
     return { valid: false, message: 'Session expired' };
   }
-  
+
   return { valid: true, session };
 }
 
 /**
  * End a session
  */
-function endSession(sessionId) {
-  db.prepare(`
-    UPDATE sessions 
-    SET is_active = 0, ended_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `).run(sessionId);
-  
-  db.prepare(`
-    UPDATE mac_ip_bindings SET is_active = 0 WHERE session_id = ?
-  `).run(sessionId);
-  
-  const session = db.prepare('SELECT mac_address FROM sessions WHERE id = ?').get(sessionId);
-  if (session) {
-    securityLog.sessionExpired(sessionId, session.mac_address);
+async function endSession(sessionId) {
+  try {
+    const firewallService = getSessionFirewallService();
+    // usage of logoutSession which handles DB update and firewall rule removal
+    await firewallService.logoutSession(sessionId);
+
+    // Legacy cleanup (just in case) - though logoutSession handles it
+    db.prepare(`
+      UPDATE mac_ip_bindings SET is_active = 0 WHERE session_id = ?
+    `).run(sessionId);
+
+  } catch (error) {
+    console.error('Failed to end session:', error);
+    // Fallback if firewall service fails
+    db.prepare(`
+      UPDATE sessions 
+      SET is_active = 0, ended_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(sessionId);
   }
 }
 
