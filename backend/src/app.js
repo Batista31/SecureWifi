@@ -86,6 +86,13 @@ if (process.env.LOG_LEVEL !== 'minimal') {
 app.use('/portal', express.static(path.join(__dirname, '../../portal')));
 app.use('/assets', express.static(path.join(__dirname, '../../portal/assets')));
 
+// Serve admin dashboard
+app.use('/admin', express.static(path.join(__dirname, '../../dashboard/dist')));
+// Handle SPA routing for admin dashboard
+app.get('/admin/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dashboard/dist/index.html'));
+});
+
 // ===========================================
 // Captive Portal Detection
 // ===========================================
