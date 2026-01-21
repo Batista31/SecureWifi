@@ -11,14 +11,14 @@ const firewallConfig = {
   // Operation mode: 'simulation' | 'production'
   // In simulation mode, rules are logged but not applied
   mode: config.security.mode,
-  
+
   // Network interfaces (used in production mode)
   interfaces: {
     wifi: process.env.WIFI_INTERFACE || 'wlan0',      // Wireless interface
-    bridge: process.env.BRIDGE_INTERFACE || 'br0',    // Bridge interface
+    bridge: process.env.BRIDGE_INTERFACE || 'wlan0',  // Using wlan0 directly (no bridge)
     lan: process.env.LAN_INTERFACE || 'eth0',         // LAN/Internet interface
   },
-  
+
   // IP ranges
   network: {
     portalIp: process.env.PORTAL_IP || '192.168.4.1',
@@ -27,7 +27,7 @@ const firewallConfig = {
     dhcpStart: process.env.DHCP_RANGE_START || '192.168.4.10',
     dhcpEnd: process.env.DHCP_RANGE_END || '192.168.4.200',
   },
-  
+
   // Ports that should always be allowed for captive portal
   portalPorts: {
     http: 80,
@@ -36,7 +36,7 @@ const firewallConfig = {
     dhcp: [67, 68],
     portal: parseInt(process.env.PORT) || 3000,
   },
-  
+
   // iptables chain names
   iptables: {
     chains: {
@@ -51,7 +51,7 @@ const firewallConfig = {
       mangle: 'mangle',
     },
   },
-  
+
   // ebtables chain names
   ebtables: {
     chains: {
@@ -59,7 +59,7 @@ const firewallConfig = {
       arpProtect: 'ARP_PROTECT',       // ARP spoofing protection
     },
   },
-  
+
   // Rule templates
   templates: {
     // Allow authenticated client to access internet
@@ -68,27 +68,27 @@ const firewallConfig = {
       chain: 'FORWARD',
       action: 'ACCEPT',
     },
-    
+
     // Block unauthenticated client from internet
     blockInternet: {
       table: 'filter',
       chain: 'FORWARD',
       action: 'DROP',
     },
-    
+
     // Redirect HTTP to portal
     redirectToPortal: {
       table: 'nat',
       chain: 'PREROUTING',
       action: 'REDIRECT',
     },
-    
+
     // Drop traffic between clients (L2)
     clientIsolation: {
       action: 'DROP',
     },
   },
-  
+
   // Logging settings
   logging: {
     logPrefix: 'CAPTIVE_PORTAL: ',
@@ -96,7 +96,7 @@ const firewallConfig = {
     logDropped: true,
     logAccepted: false,
   },
-  
+
   // Cleanup settings
   cleanup: {
     intervalMs: 60000,  // Check every minute

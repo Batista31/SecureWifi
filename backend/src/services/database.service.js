@@ -5,6 +5,7 @@
  */
 
 const db = require('../config/database.config');
+const { initDatabase: initSqlJs } = require('../config/database.config');
 const bcrypt = require('bcryptjs');
 const config = require('../config/app.config');
 
@@ -12,6 +13,9 @@ const config = require('../config/app.config');
  * Initialize the database with all required tables
  */
 async function initializeDatabase() {
+  // Initialize sql.js first (async operation)
+  await initSqlJs();
+
   // Create tables
   db.exec(`
     -- Users table: stores registered user accounts
@@ -163,7 +167,7 @@ async function initializeDatabase() {
 
   // Create default admin user if not exists
   await createDefaultAdmin();
-  
+
   // Create some sample vouchers for testing
   await createSampleVouchers();
 
@@ -175,15 +179,15 @@ async function initializeDatabase() {
  */
 async function createDefaultAdmin() {
   const adminExists = db.prepare('SELECT id FROM admin_users WHERE username = ?').get(config.admin.username);
-  
+
   if (!adminExists) {
     const passwordHash = await bcrypt.hash(config.admin.password, config.security.bcryptRounds);
-    
+
     db.prepare(`
       INSERT INTO admin_users (username, password_hash, role)
       VALUES (?, ?, 'admin')
     `).run(config.admin.username, passwordHash);
-    
+
     console.log(`✓ Default admin user created: ${config.admin.username}`);
   }
 }
@@ -193,23 +197,23 @@ async function createDefaultAdmin() {
  */
 async function createSampleVouchers() {
   const voucherCount = db.prepare('SELECT COUNT(*) as count FROM vouchers').get();
-  
+
   if (voucherCount.count === 0) {
     const sampleVouchers = [
       { code: 'TEST1234', duration: 4, devices: 2, notes: 'Test voucher 1' },
       { code: 'DEMO5678', duration: 8, devices: 1, notes: 'Demo voucher' },
       { code: 'WIFI2024', duration: 24, devices: 3, notes: 'Long duration voucher' },
     ];
-    
+
     const insertStmt = db.prepare(`
       INSERT INTO vouchers (code, duration_hours, max_devices, notes)
       VALUES (?, ?, ?, ?)
     `);
-    
+
     for (const voucher of sampleVouchers) {
       insertStmt.run(voucher.code, voucher.duration, voucher.devices, voucher.notes);
     }
-    
+
     console.log(`✓ Sample vouchers created: ${sampleVouchers.map(v => v.code).join(', ')}`);
   }
 }
@@ -219,21 +223,21 @@ async function createSampleVouchers() {
  */
 function cleanupExpiredSessions() {
   const now = new Date().toISOString();
-  
+
   // Deactivate expired sessions
   const result = db.prepare(`
     UPDATE sessions 
     SET is_active = 0, ended_at = ?
     WHERE is_active = 1 AND expires_at < ?
   `).run(now, now);
-  
+
   // Deactivate expired MAC-IP bindings
   db.prepare(`
     UPDATE mac_ip_bindings 
     SET is_active = 0
     WHERE is_active = 1 AND expires_at < ?
   `).run(now);
-  
+
   // Deactivate related firewall rules
   db.prepare(`
     UPDATE firewall_rules 
@@ -242,7 +246,7 @@ function cleanupExpiredSessions() {
       SELECT id FROM sessions WHERE is_active = 0
     )
   `).run(now);
-  
+
   return result.changes;
 }
 
